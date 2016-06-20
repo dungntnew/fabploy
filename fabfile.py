@@ -28,7 +28,7 @@ required_packages = [
    'sqlite-devel',
    'python-devel',
    'mysql-devel',
-   'wget', 'git', 'xz']
+   'wget', 'git', 'xz', 'vim']
 
 """
 project config

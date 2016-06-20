@@ -121,4 +121,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = ['/var/www/static/']
+
+# Use to collect other static foldes
+# (should not contains STATIC_ROOT)
+# STATICFILES_DIRS = ['/var/www/static/']
