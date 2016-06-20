@@ -21,7 +21,14 @@ from datetime import datetime
 """
 dependence package in remote server
 """
-required_packages = ['wget', 'git']
+required_packages = [
+   'make', 'automake',
+   'gcc',  'gcc-c++',
+   'kernel-devel',
+   'sqlite-devel',
+   'python-devel',
+   'mysql-devel',
+   'wget', 'git', 'xz']
 
 """
 project config
@@ -60,7 +67,8 @@ def init_project():
     """
     for k, mconf in config.items():
         with lcd(mconf['local']['root']):
-            local('virtualenv ./env')
+            if not exists('./env/bin/pip'):
+                local('virtualenv ./env')
             local('source ./env/bin/activate')
             local('pip install -U pip')
             local('pip install -r ./requirements.txt')
@@ -92,15 +100,15 @@ def init_server():
     & setup python env for develop(pip, virtualenv)
     """
     _init_server(config)
-    _install_python_env()
+    _install_python_env(False)
 
 @roles('local_dev')
-def init_pyenv():
+def init_pyenv(force=True):
     """
     install python dev env(pip, virtual env)
     (current using python3)
     """
-    _install_python_env()
+    _install_python_env(force)
 
 @roles('local_dev')
 def init_remote(module='api'):
@@ -128,6 +136,21 @@ def init_remote(module='api'):
         _update_static_files(mconf)
 
 @roles('local_dev')
+def update_remote(module='api'):
+    """
+    run update source code, settings, env..
+    """
+    mconf = config[module]
+    with settings(user=mconf['user'],
+                  password=mconf['password'],
+                  warn_only=True):
+        run('whoami')
+        _get_latest_src(mconf)
+        _update_settings(mconf)
+        _update_virtualenv(mconf)
+        _update_static_files(mconf)
+
+@roles('local_dev')
 def prepare_deploy():
     test()
 
@@ -147,14 +170,24 @@ def _init_server(config):
             pkgs = ' '.join(mconf['dependences'])
             sudo('yum install -y %s' % pkgs)
 
-def _install_python_env():
+def _install_python_env(force):
     """
     install setup tools and pip
     """
-    if not exists('/usr/bin/virtualenv'):
-        sudo('curl https://bootstrap.pypa.io/ez_setup.py | python -')
-        sudo('curl https://bootstrap.pypa.io/get-pip.py | python -')
-        sudo('pip install virtualenv')
+    if not exists('/usr/local/bin/virtualenv') or force == True:
+
+        run('cd /tmp/ && wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tar.xz')
+        run('cd /tmp/ && unxz Python-3.4.3.tar.xz')
+        run('cd /tmp/ && tar xfv Python-3.4.3.tar && rm Python-3.4.3.tar*')
+        run('cd /tmp/Python-3.4.3')
+        run('cd /tmp/Python-3.4.3 && ./configure')
+        run('cd /tmp/Python-3.4.3 && make')
+        sudo('cd /tmp/Python-3.4.3 && make install')
+        sudo('cd /tmp/ && rm -rf Python-3.4.3*')
+
+        sudo('curl https://bootstrap.pypa.io/ez_setup.py | /usr/local/bin/python3.4 -')
+        sudo('curl https://bootstrap.pypa.io/get-pip.py | /usr/local/bin/python3.4 -')
+        sudo('/usr/local/bin/pip3.4 install virtualenv')
 
 def _create_user(mconf):
     """
@@ -229,10 +262,11 @@ def _update_virtualenv(mconf):
     src_dir = '%s/source' % (mconf['app_path'])
     virtualenv_dir = src_dir + '/../virtualenv'
     if not exists(virtualenv_dir + '/bin/pip'):
-        run('virtualenv --python=python3 %s' % (virtualenv_dir, ))
+        run('/usr/local/bin/virtualenv %s %s' % (
+           '--python=python3', virtualenv_dir, ))
+
     run('%s/bin/pip install -r %s/requirements.txt' % (
-                                                       virtualenv_dir,
-                                                       src_dir))
+        virtualenv_dir, src_dir))
 
 def _update_static_files(mconf):
     src_dir = '%s/source' % (mconf['app_path'])
@@ -244,8 +278,6 @@ def _update_database(source_folder):
     run('cd %s && ../virtualenv/bin/python3 manage.py migrate --noinput' % (
         src_dir,
     ))
-
-# ref: http://chimera.labs.oreilly.com/books/1234000000754/ch09.html#_breakdown_of_a_fabric_script_for_our_deployment
 
 
 

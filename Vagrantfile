@@ -18,11 +18,6 @@ Vagrant.configure(2) do |config|
   $script =<<-EOF
     yum update -y
     yum install openssl* python-devel libselinux-python -y
-    cd /usr/local/src
-    wget https://bootstrap.pypa.io/ez_setup.py
-    python ez_setup.py
-    easy_install pip
-    pip install ansible
   EOF
 
   config.vm.provision "shell", inline: $script
