@@ -68,7 +68,7 @@ def init_project():
     for k, mconf in config.items():
         with lcd(mconf['local']['root']):
             if not exists('./env/bin/pip'):
-                local('virtualenv ./env')
+                local('virtualenv -p python3 ./env')
             local('source ./env/bin/activate')
             local('pip install -U pip')
             local('pip install -r ./requirements.txt')
