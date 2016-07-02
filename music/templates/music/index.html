@@ -1,38 +1,17 @@
-<!-- Loads the path to your static files -->
-{% load staticfiles %}
+{% extends 'music/base.html' %}
 
-<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"-->
-<!--integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"-->
-<!--crossorigin="anonymous">-->
-<!-- Latest compiled and minified JavaScript -->
-<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"-->
-<!--integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"-->
-<!--crossorigin="anonymous"></script>-->
+{% block body %}
+    {% if all_albums %}
+    <ul>
+        {% for album in all_albums %}
+        <li><a href="{% url 'music:detail'  album.id %}"> {{ album.album_title }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <h2>You dont have any albums</h2>
+    {% endif %}
 
-<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Satisfy"/>
-<link rel="stylesheet" type="text/css" href="{% static 'music/bootstrap.min.css' %}"/>
-<link rel="stylesheet" type="text/css" href="{% static 'music/style.css' %}"/>
-<script src="{% static 'music/bootstrap.min.js' %}"></script>
-
-
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topNavBar"></button>
-        <!-- logo -->
-        <div class="navbar-header">
-            <a class="navbar-brand" href="{% url 'music:index' %}">Frabier</a>
-        </div>
-    </div>
-</nav>
-{% if all_albums %}
-<ul>
-    {% for album in all_albums %}
-    <li><a href="{% url 'music:detail'  album.id %}"> {{ album.album_title }}</a></li>
-    {% endfor %}
-</ul>
-{% else %}
-<h2>You dont have any albums</h2>
-{% endif %}
+{% endblock %}
 
 <!--
 
