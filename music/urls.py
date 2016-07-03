@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from . import views
+from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = 'music'
 
@@ -27,4 +28,10 @@ urlpatterns = [
     # /music/71/favorite
     url(r'^(?P<album_id>[0-9]+)/favorite/$', views.favorite, name='favorite'),
 
+    # rest
+    url(r'^api/albums/$', views.AlbumList.as_view(), name='album-list'),
+    url(r'^api/albums/(?P<pk>[0-9]+)/$', views.AlbumDetail.as_view(), name='album-one'),
+
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

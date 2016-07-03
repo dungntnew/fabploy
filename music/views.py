@@ -1,24 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login
 from django.views.generic import View
-
 from .forms import UserForm
-
-#
-#
-# def index(request):
-#     all_albums = Album.objects.all()
-#     context = {'all_albums': all_albums}
-#     return render(request=request, template_name='music/index.html', context=context)
-#
-#
-# def detail(request, album_id):
-#     album = get_object_or_404(Album, pk=album_id)
-#     return render(request, 'music/detail.html', {'album': album})
-#
-#
-
-
 from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from .models import Album, Song
@@ -97,3 +80,33 @@ class UserFormView(View):
                     return redirect('music:index')
 
         return render(request, self.template_name, {'form': form})
+
+
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
+from .serializers import AlbumSerializer
+
+
+# list all album or create new one
+# /api/albums/
+class AlbumList(APIView):
+    def get(self, request):
+        albums = Album.objects.all()
+        serializer = AlbumSerializer(albums, many=True)
+        return Response(serializer.data)
+
+    def post(self):
+        pass
+
+
+# get one album or update or delete
+# /api/albums/
+class AlbumDetail(APIView):
+    def get(self, request, pk):
+        album = Album.objects.get(pk=pk)
+        serializer = AlbumSerializer(album, many=False)
+        return Response(serializer.data)
+
+    def post(self):
+        pass
